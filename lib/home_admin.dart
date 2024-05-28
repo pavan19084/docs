@@ -5,7 +5,7 @@ class HomeAdmin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Scaffold(
         body: Text("admin"),
       ),

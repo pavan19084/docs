@@ -1,6 +1,5 @@
-// import 'package:docs/home_admin.dart';
-// import 'package:docs/home_user.dart';
 import 'package:docs/signin.dart';
+import 'package:docs/verify.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -37,11 +36,11 @@ class _SignUpState extends State<SignUp> {
         } else {
           // Handle successful sign-up
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Sign-up successful! Please log in.')),
+            SnackBar(content: Text('Sign-up successful! Please verify your email.')),
           );
           Navigator.pushAndRemoveUntil<void>(
             context,
-            MaterialPageRoute<void>(builder: (BuildContext context) => SignIn()),
+            MaterialPageRoute<void>(builder: (BuildContext context) => EmailVerification()),
             ModalRoute.withName('/'),
           );
         }

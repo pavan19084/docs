@@ -35,7 +35,7 @@ class _SignInState extends State<SignIn> {
       } else {
         // Handle successful login
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login successful!')),
+          const SnackBar(content: Text('Login successful!')),
         );
         if (email.endsWith('@charusat.edu.in')) {
           Navigator.pushAndRemoveUntil<void>(
@@ -62,7 +62,7 @@ class _SignInState extends State<SignIn> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 600), // Adjust maxWidth as needed
+              constraints: const BoxConstraints(maxWidth: 600), // Adjust maxWidth as needed
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -87,7 +87,7 @@ class _SignInState extends State<SignIn> {
                     const SizedBox(height: 20),
                     TextFormField(
                       controller: emailController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'University Email',
                         hintText: 'ex: 21dce001@charusat.edu.in',
                         border: OutlineInputBorder(),
