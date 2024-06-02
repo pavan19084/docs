@@ -23,9 +23,11 @@ class _EmailVerificationState extends State<EmailVerification> {
     final user = supabase.auth.currentUser;
 
     if (user != null && user.emailConfirmedAt != null) {
-      setState(() {
-        _isEmailVerified = true;
-      });
+      setState(
+        () {
+          _isEmailVerified = true;
+        },
+      );
     }
   }
 
@@ -35,7 +37,8 @@ class _EmailVerificationState extends State<EmailVerification> {
       Future.delayed(Duration.zero, () {
         Navigator.pushAndRemoveUntil<void>(
           context,
-          MaterialPageRoute<void>(builder: (BuildContext context) => SignIn()),
+          MaterialPageRoute<void>(
+              builder: (BuildContext context) => const SignIn()),
           ModalRoute.withName('/'),
         );
       });
@@ -65,7 +68,9 @@ class _EmailVerificationState extends State<EmailVerification> {
                   onPressed: () {
                     Navigator.pushAndRemoveUntil<void>(
                       context,
-                      MaterialPageRoute<void>(builder: (BuildContext context) => SignIn()),
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext context) => const SignIn(),
+                      ),
                       ModalRoute.withName('/'),
                     );
                   },

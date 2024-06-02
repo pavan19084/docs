@@ -1,6 +1,7 @@
-import 'package:docs/signin.dart';
-import 'package:docs/verify.dart';
+import 'package:docs/auth_controller.dart';
+import 'package:docs/routes_name.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignUp extends StatefulWidget {
@@ -11,47 +12,18 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
-  final SupabaseClient supabase = Supabase.instance.client;
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _form = GlobalKey<FormState>();
   bool _obscurePassword = true;
+  final TextEditingController emailcontroller = TextEditingController(text: "");
+  final TextEditingController passwordcontroller =
+      TextEditingController(text: "");
+  final TextEditingController namecontroller = TextEditingController(text: "");
 
-  Future<void> _signUp() async {
-    if (_formKey.currentState!.validate()) {
-      final email = emailController.text.trim();
-      final password = passwordController.text.trim();
-
-      if (email.endsWith('@charusat.edu.in') || email.endsWith('@charusat.ac.in')) {
-        final response = await supabase.auth.signUp(
-          email,
-          password,
-        );
-        if (response.error != null) {
-          // Handle error
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${response.error!.message}')),
-          );
-        } else {
-          // Handle successful sign-up
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Sign-up successful! Please verify your email.')),
-          );
-          Navigator.pushAndRemoveUntil<void>(
-            context,
-            MaterialPageRoute<void>(builder: (BuildContext context) => EmailVerification()),
-            ModalRoute.withName('/'),
-          );
-        }
-      } else {
-        // Show error if email is not from organization
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: Please use your Charusat email')),
-        );
-      }
-    }
-  }
+  final AuthController authController = Get.put(
+    AuthController(
+      authApi: AuthApi(supabaseClient: Supabase.instance.client),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -61,31 +33,37 @@ class _SignUpState extends State<SignUp> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 600), // Adjust maxWidth as needed
+              constraints: const BoxConstraints(maxWidth: 600),
               child: Form(
-                key: _formKey,
+                key: _form,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Image.asset(
-                      'assets/logo.jpg', // Path to your asset
-                      height: 100, // Adjust the height as needed
+                      'assets/logo.jpg',
+                      height: 100,
                     ),
                     const SizedBox(height: 20),
                     const Text(
                       'Charusat Docs',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     const Text(
                       'Sign Up',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     TextFormField(
-                      controller: nameController,
-                      decoration: InputDecoration(
+                      controller: namecontroller,
+                      decoration: const InputDecoration(
                         labelText: 'Name',
                         hintText: 'ex: Smith Johnson',
                         border: OutlineInputBorder(),
@@ -99,8 +77,8 @@ class _SignUpState extends State<SignUp> {
                     ),
                     const SizedBox(height: 20),
                     TextFormField(
-                      controller: emailController,
-                      decoration: InputDecoration(
+                      controller: emailcontroller,
+                      decoration: const InputDecoration(
                         labelText: 'University Email',
                         hintText: 'ex: 21dce001@charusat.edu.in',
                         border: OutlineInputBorder(),
@@ -108,7 +86,8 @@ class _SignUpState extends State<SignUp> {
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your email';
-                        } else if (!value.endsWith('@charusat.edu.in') && !value.endsWith('@charusat.ac.in')) {
+                        } else if (!value.endsWith('@charusat.edu.in') &&
+                            !value.endsWith('@charusat.ac.in')) {
                           return 'Please use your Charusat email';
                         }
                         return null;
@@ -116,12 +95,12 @@ class _SignUpState extends State<SignUp> {
                     ),
                     const SizedBox(height: 20),
                     TextFormField(
-                      controller: passwordController,
+                      controller: passwordcontroller,
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
                         labelText: 'Password',
                         hintText: 'Enter Your Password',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
@@ -129,7 +108,9 @@ class _SignUpState extends State<SignUp> {
                             });
                           },
                           icon: Icon(
-                            _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                            _obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                           ),
                         ),
                       ),
@@ -147,20 +128,30 @@ class _SignUpState extends State<SignUp> {
                       },
                     ),
                     const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _signUp,
-                      child: const Text('Sign Up'),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 50), // Make button full width
+                    Obx(
+                      () => ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 50),
+                        ),
+                        onPressed: () {
+                          if (_form.currentState!.validate() &&
+                              authController.signuploading.value == false) {
+                            authController.signup(
+                                emailcontroller.text, passwordcontroller.text);
+                          }
+                        },
+                        child: Text(
+                          authController.signuploading.value
+                              ? "Loading...."
+                              : "Sign Up",
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
                     TextButton(
                       onPressed: () {
-                        Navigator.pushAndRemoveUntil<void>(
-                          context,
-                          MaterialPageRoute<void>(builder: (BuildContext context) => SignIn()),
-                          ModalRoute.withName('/'),
+                        Get.toNamed(
+                          RoutesName.signin,
                         );
                       },
                       child: const Text('Already have an account? Sign In'),

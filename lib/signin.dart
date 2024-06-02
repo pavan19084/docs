@@ -1,7 +1,7 @@
-import 'package:docs/home_admin.dart';
-import 'package:docs/home_user.dart';
-import 'package:docs/signup.dart';
+import 'package:docs/auth_controller.dart';
+import 'package:docs/routes_name.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignIn extends StatefulWidget {
@@ -12,47 +12,17 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
-  final SupabaseClient supabase = Supabase.instance.client;
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _form = GlobalKey<FormState>();
   bool _obscurePassword = true;
+  final TextEditingController emailcontroller = TextEditingController(text: "");
+  final TextEditingController passwordcontroller =
+      TextEditingController(text: "");
 
-  Future<void> _signIn() async {
-    if (_formKey.currentState!.validate()) {
-      final email = emailController.text.trim();
-      final password = passwordController.text.trim();
-
-      final response = await supabase.auth.signIn(
-        email: email,
-        password: password,
-      );
-      if (response.error != null) {
-        // Handle error
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response.error!.message}')),
-        );
-      } else {
-        // Handle successful login
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login successful!')),
-        );
-        if (email.endsWith('@charusat.edu.in')) {
-          Navigator.pushAndRemoveUntil<void>(
-            context,
-            MaterialPageRoute<void>(builder: (BuildContext context) => HomeUser()),
-            ModalRoute.withName('/'),
-          );
-        } else if (email.endsWith('@charusat.ac.in')) {
-          Navigator.pushAndRemoveUntil<void>(
-            context,
-            MaterialPageRoute<void>(builder: (BuildContext context) => HomeAdmin()),
-            ModalRoute.withName('/'),
-          );
-        }
-      }
-    }
-  }
+  final AuthController authController = Get.put(
+    AuthController(
+      authApi: AuthApi(supabaseClient: Supabase.instance.client),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -62,9 +32,9 @@ class _SignInState extends State<SignIn> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 600), // Adjust maxWidth as needed
+              constraints: const BoxConstraints(maxWidth: 600),
               child: Form(
-                key: _formKey,
+                key: _form,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -76,17 +46,21 @@ class _SignInState extends State<SignIn> {
                     const SizedBox(height: 20),
                     const Text(
                       'Welcome To Charusat Docs',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
                     const Text(
                       'Sign In',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     TextFormField(
-                      controller: emailController,
+                      controller: emailcontroller,
                       decoration: const InputDecoration(
                         labelText: 'University Email',
                         hintText: 'ex: 21dce001@charusat.edu.in',
@@ -95,7 +69,8 @@ class _SignInState extends State<SignIn> {
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your email';
-                        } else if (!value.endsWith('@charusat.edu.in') && !value.endsWith('@charusat.ac.in')) {
+                        } else if (!value.endsWith('@charusat.edu.in') &&
+                            !value.endsWith('@charusat.ac.in')) {
                           return 'Please use your Charusat email';
                         }
                         return null;
@@ -103,12 +78,12 @@ class _SignInState extends State<SignIn> {
                     ),
                     const SizedBox(height: 20),
                     TextFormField(
-                      controller: passwordController,
+                      controller: passwordcontroller,
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
                         labelText: 'Password',
                         hintText: 'Enter Your Password',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
@@ -116,7 +91,9 @@ class _SignInState extends State<SignIn> {
                             });
                           },
                           icon: Icon(
-                            _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                            _obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                           ),
                         ),
                       ),
@@ -128,21 +105,29 @@ class _SignInState extends State<SignIn> {
                       },
                     ),
                     const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _signIn,
-                      child: const Text('Sign In'),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 50), // Make button full width
+                    Obx(
+                      () => ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 50),
+                        ),
+                        onPressed: () {
+                          if (_form.currentState!.validate() &&
+                              authController.signinloading.value == false) {
+                            authController.login(
+                                emailcontroller.text, passwordcontroller.text);
+                          }
+                        },
+                        child: Text(
+                          authController.signinloading.value
+                              ? "Loading........"
+                              : 'Sign In',
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
                     TextButton(
                       onPressed: () {
-                        Navigator.pushAndRemoveUntil<void>(
-                          context,
-                          MaterialPageRoute<void>(builder: (BuildContext context) => SignUp()),
-                          ModalRoute.withName('/'),
-                        );
+                        Get.toNamed(RoutesName.signup);
                       },
                       child: const Text("Don't have an account? Sign Up"),
                     ),
