@@ -1,3 +1,4 @@
+import 'package:docs/supabase.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:docs/routes_name.dart'; // Ensure you import your routes
@@ -33,6 +34,20 @@ class AuthController extends GetxController {
       Get.snackbar("Error", response.error!.message);
     }
   }
+
+  Future<void> logout() async {
+    await authApi.logout_method();
+    Get.offAllNamed(RoutesName.signin); // Navigate to the sign-in page
+  }
+
+  Future<void> resetPassword(String email) async {
+    final response = await authApi.resetPassword_method(email);
+    if (response.error == null) {
+      Get.snackbar("Success", "Password reset link sent to your email.");
+    } else {
+      Get.snackbar("Error", response.error!.message);
+    }
+  }
 }
 
 class AuthApi {
@@ -50,6 +65,16 @@ class AuthApi {
   Future<GotrueSessionResponse> signup_method(
       String email, String password) async {
     final response = await supabaseClient.auth.signUp(email, password);
+    return response;
+  }
+
+  Future<void> logout_method() async {
+    await supabaseClient.auth.signOut();
+    StorageService.clearUserSession();
+  }
+
+  Future<GotrueJsonResponse> resetPassword_method(String email) async {
+    final response = await supabaseClient.auth.api.resetPasswordForEmail(email);
     return response;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:docs/done.dart';
+import 'package:docs/forgot_password.dart';
 import 'package:docs/signin.dart';
 import 'package:docs/signup.dart';
 import 'package:docs/verify.dart';
@@ -9,6 +10,7 @@ class RoutesName {
   static const String signup = "/signup";
   static const String done = "/done";
   static const String verify = "/verify";
+  static const String forgotPassword = "/forgotPassword";
 }
 
 class Pages {
@@ -20,6 +22,10 @@ class Pages {
     GetPage(
       name: RoutesName.signup,
       page: () => const SignUp(),
+    ),
+    GetPage(
+      name: RoutesName.forgotPassword,
+      page: () => const ForgotPassword(),
     ),
     GetPage(
       name: RoutesName.done,

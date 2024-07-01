@@ -22,19 +22,17 @@ class SupabaseService extends GetxService {
     SupabaseService.supabase.auth.onAuthStateChange((event, session) {
       if (event == AuthChangeEvent.signedOut) {
         StorageService.clearUserSession();
-        Get.offAll(RoutesName.signin);
+        Get.toNamed(RoutesName.signin);
       } else if (event == AuthChangeEvent.signedIn) {
         if (session != null) {
           StorageService.saveUserSession(session);
           Get.offNamed(RoutesName.done);
         }
-      } else if (event == AuthChangeEvent.tokenRefreshed) {
-        StorageService.clearUserSession();
-        Get.offAll(RoutesName.signin);
       }
     });
   }
 }
+
 
 class Constants {
   static const String ApkUrl = "https://gznsrxsyvanpvmhdsqdz.supabase.co";

@@ -131,6 +131,12 @@ class _SignInState extends State<SignIn> {
                       },
                       child: const Text("Don't have an account? Sign Up"),
                     ),
+                    TextButton(
+                      onPressed: () {
+                        Get.toNamed(RoutesName.forgotPassword);
+                      },
+                      child: const Text('Forgot Password?'),
+                    ),
                   ],
                 ),
               ),
